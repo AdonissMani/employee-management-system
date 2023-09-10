@@ -2,28 +2,21 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import EmployeeService from '../services/EmployeeService';
 
-function EmployeeFormComponent() {
-    const { id } = useParams();
+function UpdateEmployeeComponent() {
+    const { id } = useParams(); // Get the ID parameter from the URL
     const navigate = useNavigate();
     const [formData, setFormData] = useState({
         firstName: '',
         lastName: '',
-        emailId: '',
+        emailId: ''
     });
-    const [message, setMessage] = useState(null); // State for messages
 
     useEffect(() => {
-        if (id) {
-            // Load the employee data for editing when the component mounts
-            EmployeeService.getEmployeeById(id)
-                .then((res) => {
-                    const employeeData = res.data;
-                    setFormData(employeeData);
-                })
-                .catch((error) => {
-                    setMessage('Error loading employee data.');
-                });
-        }
+        // Load the employee data for editing when the component mounts
+        EmployeeService.getEmployeeById(id).then((res) => {
+            const employeeData = res.data;
+            setFormData(employeeData);
+        });
     }, [id]);
 
     // Event handler for input changes
@@ -33,53 +26,33 @@ function EmployeeFormComponent() {
     };
 
     // Event handler for form submission
-    const saveEmployee = (e) => {
+    const updateEmployee = (e) => {
         e.preventDefault();
         // You can handle the form submission logic here, e.g., send data to an API
-        let employee = { ...formData };
+        let updatedEmployee = { ...formData };
+        EmployeeService.updateEmployee(id, updatedEmployee).then((res) => {
+            navigate('/employees');
+        });
+        console.log('Form submitted with updated data:', updatedEmployee);
 
-        if (id) {
-            // Update an existing employee
-            EmployeeService.updateEmployee(id, employee)
-                .then((res) => {
-                        alert('Employee updated successfully');
-                        navigate('/employees');
-                })
-                .catch((error) => {
-                    setMessage('Error updating employee.');
-                });
-        } else {
-            // Create a new employee
-            EmployeeService.createEmployee(employee)
-                .then((res) => {
-                   
-                        alert('Employee created successfully');
-                        navigate('/employees');
-                    
-                })
-                .catch((error) => {
-                    setMessage('Error creating employee.');
-                });
-        }
+        // After updating, navigate back to the employee list
     };
 
     // Event handler for cancel button click
     const handleCancel = () => {
         // Navigate back to the employee list
         navigate('/employees');
+        console.log('Cancel button clicked');
     };
 
     return (
         <div>
-            {message && <div className='message'>{message}</div>}
             <div className='container'>
                 <div className='row'>
                     <div className='card col-md-6 offset-md-3 offset-md-3'>
-                        <h3 className='text-center'>
-                            {id ? 'Update Employee' : 'Add Employee'}
-                        </h3>
+                        <h3 className='text-center'>Update Employee</h3>
                         <div className='card-body'>
-                            <form onSubmit={saveEmployee}>
+                            <form onSubmit={updateEmployee}>
                                 <div className='form-group'>
                                     <label>First Name</label>
                                     <input
@@ -90,7 +63,7 @@ function EmployeeFormComponent() {
                                         value={formData.firstName}
                                         onChange={handleChange}
                                     />
-                                    <br></br>
+
                                     <label>Last Name</label>
                                     <input
                                         type='text'
@@ -100,7 +73,7 @@ function EmployeeFormComponent() {
                                         value={formData.lastName}
                                         onChange={handleChange}
                                     />
-                                    <br></br>
+
                                     <label>Email</label>
                                     <input
                                         type='email'
@@ -113,7 +86,7 @@ function EmployeeFormComponent() {
                                 </div>
 
                                 <button className='btn btn-success' type='submit'>
-                                    {id ? 'Update' : 'Save'}
+                                    Update
                                 </button>
                                 <button
                                     className='btn btn-danger ml-2'
@@ -130,4 +103,4 @@ function EmployeeFormComponent() {
     );
 }
 
-export default EmployeeFormComponent;
+export default UpdateEmployeeComponent;
